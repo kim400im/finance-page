@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyPage</title>
+</head>
+<body>
+    <h1>My Accounting Records</h1>
+    <ul id="accounting-records"></ul>
+
+    <script>
+        // 로컬 스토리지에서 JWT 토큰 가져오기
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('You need to log in first.');
+            window.location.href = '/login';
+        }
+
+        // 마이페이지 데이터 가져오기
+        fetch('/api/mypage', {
+            method: 'GET',
+            headers: {
+                'Authorization': token
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            }
+
+            const recordsList = document.getElementById('accounting-records');
+            data.records.forEach(record => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Record: ${record.description}, Amount: ${record.amount}`;
+                recordsList.appendChild(listItem);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>

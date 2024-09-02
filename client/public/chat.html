@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Messages</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Chat Messages</h1>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="accounting.html">Accounting</a></li>
+            <li><a href="chat.html">Chat</a></li>
+        </ul>
+    </nav>
+    <ul id="chat-list"></ul>
+
+    <form id="chat-form">
+        <input type="text" id="chat-input" placeholder="Type a message..." required />
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const chatList = document.getElementById('chat-list');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+
+            function fetchMessages() {
+                fetch('/api/chat')
+                    .then(response => response.json())
+                    .then(data => {
+                        chatList.innerHTML = '';
+                        data.forEach(msg => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `${msg.sender}: ${msg.message} (${new Date(msg.sentAt).toLocaleString()})`;
+                            chatList.appendChild(listItem);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching chat messages:', error));
+            }
+
+            chatForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const message = chatInput.value;
+                
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender: 'User', message })
+                })
+                .then(response => response.json())
+                .then(newMessage => {
+                    chatInput.value = '';
+                    fetchMessages(); // 새로운 메시지를 가져옴
+                })
+                .catch(error => console.error('Error sending message:', error));
+            });
+
+            fetchMessages();
+        });
+    </script>
+</body>
+</html>
